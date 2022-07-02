@@ -1,7 +1,7 @@
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
-fun createTestCase1() {
+fun createTestCase() {
     addUsers() // user1..9
     addGuardians() //guardian1..4
     addWards() //wards5..9
@@ -33,7 +33,7 @@ fun addGuardians() {
 
     for (i: Int in 1..4) {
         val guardian = Guardians(i)
-        document.child("guardianid-${i}").setValue(guardian)
+        document.child("userid-${i}").setValue(guardian)
     }
 }
 
@@ -43,7 +43,7 @@ fun addWards() {
 
     for (i: Int in 5..9) {
         val ward = Wards(i)
-        document.child("wardid-${i}").setValue(ward)
+        document.child("userid-${i}").setValue(ward)
     }
 }
 
@@ -79,7 +79,7 @@ fun addResults() {
 
     for (i: Int in 5..9) {
         val result = Results(i)
-        document.child("questionid-${i}").setValue(result)
+        document.child("resultid-${i}").setValue(result)
     }
 }
 
@@ -108,7 +108,7 @@ class Users {
         this.profileAddress = "프로필 주소 ${i}"
         this.name  = "이름 ${i}"
         this.gender = "성별 ${i}"
-        this.dataOfBirth = "1999년01월0${i}일"
+        this.dataOfBirth = "1999/01/0${i}"
         this.phone = "010-1234-123${i}"
         this.address = "주소 ${i}"
         this.token = "토큰 ${i}"
@@ -116,14 +116,12 @@ class Users {
 }
 
 class Guardians {
-    var user_id = ""
     lateinit var myRegardList: ArrayList<String>
     lateinit var myQuestionList: ArrayList<String>
     lateinit var connectedUserList: ArrayList<String>
 
     constructor()
     constructor(i: Int) {
-        this.user_id = "userid-${i}"
         this.myRegardList = arrayListOf("regerdid-${1+3*(i-1)}", "regerdid-${2+3*(i-1)}", "regerdid-${3+3*(i-1)}")
         this.myQuestionList = arrayListOf("question-${1+3*(i-1)}", "question-${2+3*(i-1)}","question-${3+3*(i-1)}")
         this.connectedUserList = arrayListOf("userid-5", "userid-6", "userid-7")
@@ -131,7 +129,6 @@ class Guardians {
 }
 
 class Wards {
-    var user_id = ""
     lateinit var connectedRegardsList: ArrayList<String>
     lateinit var resultList: ArrayList<String>
     lateinit var requestedList: ArrayList<String>
@@ -139,7 +136,6 @@ class Wards {
 
     constructor()
     constructor(i: Int) {
-        this.user_id = "userid-${i}"
         this.connectedRegardsList = arrayListOf("regerdid-${1+3*(i-1)}", "regerdid-${2+3*(i-1)}", "regerdid-${3+3*(i-1)}")
         this.resultList = arrayListOf("resultid-${i}")
         this.requestedList = arrayListOf("userid-4")
@@ -183,7 +179,7 @@ class Results {
 
     constructor()
     constructor(i: Int) {
-        this.date = "2022년07월02일"
+        this.date = "2022/07/02"
         this.regard_id = "regardid-${i}"
         this.responseTime = "01시간05분24초"
         this.answerList = arrayListOf("answerid-${1+3*(i-5)}", "answerid-${2+3*(i-5)}", "answerid-${3+3*(i-5)}")
