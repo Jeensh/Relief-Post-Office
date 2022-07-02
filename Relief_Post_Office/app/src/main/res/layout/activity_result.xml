@@ -8,12 +8,25 @@
 
     <ImageView
         android:id="@+id/imgProfile"
-        android:layout_width="82dp"
+        android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="18dp"
+        android:layout_marginEnd="13dp"
+        app:layout_constraintEnd_toStartOf="@+id/textWardName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/textWardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="215dp"
+        android:text="피보호자 이름"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgProfile"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
