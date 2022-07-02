@@ -3,7 +3,6 @@ package com.Seoul42.relief_post_office
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.Seoul42.relief_post_office.databinding.ActivityMainBinding
-import android.content.Intent
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
