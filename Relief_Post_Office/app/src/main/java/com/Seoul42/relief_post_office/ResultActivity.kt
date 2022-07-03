@@ -14,7 +14,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 
 class ResultActivity : AppCompatActivity() {
@@ -40,7 +39,6 @@ class ResultActivity : AppCompatActivity() {
         setWardName()
         setDate()
 
-        //resultList = loadData()
         resultListRef = database.getReference("wards").child(wardId).child("resultList")
         adapter = ResultAdapter(resultList)
         with(binding) {
@@ -48,8 +46,6 @@ class ResultActivity : AppCompatActivity() {
             recyclerView.layoutManager = LinearLayoutManager(baseContext)
         }
         loadResult()
-//        resultList = loadData()
-//        Log.d("파이어베이스", resultList.toString())
     }
 
     fun setProfile(path: String) {
@@ -98,17 +94,5 @@ class ResultActivity : AppCompatActivity() {
                 print(error.message)
             }
         })
-    }
-
-    fun loadData() : MutableList<Results> {
-        val data: MutableList<Results> = mutableListOf()
-        for (no in 1..9) {
-            var result = Results()
-            result.regard_id = "reqardid-${no}"
-            result.date = "2022/04/15"
-            result.responseTime = "4분"
-            data.add(result)
-        }
-        return data
     }
 }
