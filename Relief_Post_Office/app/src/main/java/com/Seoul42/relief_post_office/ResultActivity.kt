@@ -1,39 +1,114 @@
 package com.Seoul42.relief_post_office
 
+import Results
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.Seoul42.relief_post_office.databinding.ActivityResultBinding
 import com.bumptech.glide.Glide
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import org.json.JSONObject
+import java.text.SimpleDateFormat
 
 class ResultActivity : AppCompatActivity() {
     val binding by lazy { ActivityResultBinding.inflate(layoutInflater) }
     val database = Firebase.database
-    val storage = Firebase.storage("gs://relief-post-office-58784.appspot.com")
+    val storage = Firebase.storage("gs://test-7d718.appspot.com/")
+
+    //intent로 넘어와야 할 정보들
+    val wardId = "userid-6"
+    //끝
+
+    lateinit var date: String
+    lateinit var resultsRef: DatabaseReference
+    lateinit var resultListRef: DatabaseReference
+
+    var resultList = mutableListOf<Results>()
+    lateinit var adapter: ResultAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //intent로 넘어와야 할 정보들
-        val wardId = "userid-5"
-        //끝
-        database.getReference("users")
-            .child(wardId)
-            .child("name")
-            .get()
-            .addOnSuccessListener {
-            binding.textWardName.text = it.value.toString()
-        }
-        downloadImage("/profile/${wardId}.png")
         setContentView(binding.root)
+        setProfile("/profile/${wardId}.png")
+        setWardName()
+        setDate()
 
+        //resultList = loadData()
+        resultListRef = database.getReference("wards").child(wardId).child("resultList")
+        adapter = ResultAdapter(resultList)
+        with(binding) {
+            recyclerView.adapter = adapter
+            recyclerView.layoutManager = LinearLayoutManager(baseContext)
+        }
+        loadResult()
+//        resultList = loadData()
+//        Log.d("파이어베이스", resultList.toString())
     }
-    fun downloadImage(path: String) {
+
+    fun setProfile(path: String) {
         storage.getReference(path).downloadUrl.addOnSuccessListener { uri ->
             Glide.with(this).load(uri).into(binding.imgProfile)
         }.addOnFailureListener {
             Log.e("스토리지", "다운로드 에러=>${it.message}")
         }
+    }
+
+    fun setWardName() {
+        val usersRef = database.getReference("users")
+        usersRef.child(wardId)
+            .child("name")
+            .get()
+            .addOnSuccessListener {
+                binding.textWardName.text = it.value.toString()
+            }
+    }
+
+    fun setDate() {
+        val sdf = SimpleDateFormat("yyyy/MM/dd")
+        date = sdf.format(System.currentTimeMillis())
+        binding.textDate.text = date
+    }
+
+    fun loadResult() {
+        resultListRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                resultList.clear()
+                for(item in snapshot.children) {
+                    item.getValue(String::class.java)?.let { resultId ->
+                        resultsRef = database.getReference("results")
+                        resultsRef.child(resultId).get().addOnSuccessListener {
+                            val result = it.getValue(Results::class.java)
+                            if (result != null) {
+                                if (result.date == date)
+                                    resultList.add(result)
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                print(error.message)
+            }
+        })
+    }
+
+    fun loadData() : MutableList<Results> {
+        val data: MutableList<Results> = mutableListOf()
+        for (no in 1..9) {
+            var result = Results()
+            result.regard_id = "reqardid-${no}"
+            result.date = "2022/04/15"
+            result.responseTime = "4분"
+            data.add(result)
+        }
+        return data
     }
 }
