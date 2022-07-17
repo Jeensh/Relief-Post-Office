@@ -3,6 +3,7 @@ package com.seoul42.relief_post_office.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,13 +55,47 @@ class ResultDetailAdapter (private val context : Context,
     }
 
     private fun setAnswerRecord(binding: ItemResultDetailBinding, answer: AnswerDTO) {
-        if (answer.questionRecord) {
-            val recordBtn = binding.btnResultQuetionPlay
+        val recordBtn = binding.btnResultQuetionPlay
+        if (answer.questionRecord && (answer.answerSrc != "") && (answer.reply == true)) {
+            recordBtn.setImageResource(R.drawable.playbtn)
             recordBtn.visibility = View.VISIBLE
-            recordBtn.setOnClickListener {
-                // 녹음 재생
+            // 재생 버튼 클릭 이벤트
+            var playing = false
+            var player: MediaPlayer? = null
+            recordBtn.setOnClickListener{
+                // 재생 중이면 재생 버튼으로 이미지 변경
+                if (playing){
+                    player?.release()
+                    player = null
+                    recordBtn.setImageResource(R.drawable.playbtn)
+                    playing = false
+                }
+                // 재생 중이 아니면 중지 버튼으로 이미지 변경
+                else{
+                    // 녹음 소스 불러와서 미디어 플레이어 세팅
+                    player = MediaPlayer().apply {
+                        setDataSource(answer.answerSrc)
+                        prepare()
+                    }
+
+                    player?.setOnCompletionListener {
+                        player?.release()
+                        player = null
+
+                        recordBtn.setImageResource(R.drawable.playbtn)
+                        playing = false
+                    }
+
+                    // 재생
+                    player?.start()
+
+                    recordBtn.setImageResource(R.drawable.stopbtn)
+                    playing = true
+                }
             }
         }
+        else
+            recordBtn.visibility = View.INVISIBLE
     }
 
     private fun setAnswerReply(binding: ItemResultDetailBinding, answer: AnswerDTO) {

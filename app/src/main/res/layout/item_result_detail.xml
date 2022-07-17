@@ -44,11 +44,11 @@
         app:layout_constraintStart_toStartOf="@id/vertical_guideline3"
         app:layout_constraintEnd_toEndOf="@+id/vertical_guideline8" />
 
-    <Button
+    <ImageView
         android:id="@+id/btn_result_quetion_play"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/result_play"
+        app:srcCompat="@drawable/playbtn"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/horizontal_guideline21"
         app:layout_constraintEnd_toStartOf="@+id/vertical_guideline13"
