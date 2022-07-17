@@ -3,10 +3,13 @@ package com.seoul42.relief_post_office.ward
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.view.WindowManager
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
@@ -31,11 +34,20 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var safetyId : String
     private lateinit var resultId : String
 
+    private lateinit var imageView : ImageButton
+    private lateinit var animationDrawable: AnimationDrawable
+
     private var mediaPlayer: MediaPlayer? = null
 
+    @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        imageView = binding.alarmButton
+        animationDrawable = imageView.background as AnimationDrawable
+
+        animationDrawable.start()
 
         setAlarm()
         setButton()
@@ -55,10 +67,10 @@ class AlarmActivity : AppCompatActivity() {
 
     /* 알람 설정 */
     private fun setAlarm() {
-        val date = SimpleDateFormat("MM월 dd일 E요일 HH:mm")
+        val date = SimpleDateFormat("MM월 dd일 E요일 HH : mm")
             .format(Date(System.currentTimeMillis()))
         val curDay = date.substring(0, 11)
-        val curTime = date.substring(12, 17)
+        val curTime = date.substring(12, 19)
         val finishTime : Long = 300000
         val recommendDTO = intent.getSerializableExtra("recommendDTO") as WardRecommendDTO
         val safetyDB = Firebase.database.reference.child("safety")

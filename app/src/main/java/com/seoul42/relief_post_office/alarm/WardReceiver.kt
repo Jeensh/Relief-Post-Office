@@ -88,7 +88,7 @@ class WardReceiver() : BroadcastReceiver() {
 
     /*
      *  네트워크 연결이 안될 경우 실행하는 메서드
-     *  5분 단위로 네트워크 알람 요청을 수행
+     *  30초 단위로 네트워크 알람 요청을 수행
      */
     private fun setNetworkAlarm(context : Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -101,7 +101,7 @@ class WardReceiver() : BroadcastReceiver() {
         val interval = Calendar.getInstance()
 
         interval.timeInMillis = System.currentTimeMillis()
-        interval.add(Calendar.MINUTE, 5) /* Here! */
+        interval.add(Calendar.SECOND, 30) /* Here! */
         alarmManager.cancel(sender)
 
         if (Build.VERSION.SDK_INT >= 23) {
@@ -202,7 +202,7 @@ class WardReceiver() : BroadcastReceiver() {
     }
 
     /*
-     *  피보호자가 보유한 각각의 결과에 대해 결과가 존재할 경우, 조건에 따라 결과에 대한 수정 작업을 결정하는 메서드
+     *  피보호자가 보유한 각각의 결과에 대해 결과가 존재할 경우, 조건에 따라 결과에 대한 삭제 작업을 결정하는 메서드
      *  - (결과 날짜 < 현재 날짜) : 이전 결과이므로 수정 작업을 수행 x
      *  - (결과 날짜 = 현재 날짜) : 현재 진행될 수 있는 결과이므로 수정 작업을 수행 x
      *  - (결과 날짜 > 현재 날짜) : 미리 만들어둔 결과이므로 삭제 작업을 수행

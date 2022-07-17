@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="80dp"
     tools:context=".guardian.MainFragment">
 
     <LinearLayout
@@ -35,8 +35,9 @@
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"
-        android:text="안부의 이름 입니다"
-        android:textSize="24sp"
+        android:maxLength="10"
+        android:text="@string/safety_name"
+        android:textSize="20sp"
         android:textColor="@color/black"
         app:layout_constraintTop_toTopOf="@id/horizontal_guideline1"
         app:layout_constraintBottom_toBottomOf="@id/horizontal_guideline2"
@@ -48,8 +49,8 @@
         android:id="@+id/result_dialog_isAnswer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="미응답"
-        android:textSize="16sp"
+        android:text="@string/non_response"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/vertical_guideline6"
         app:layout_constraintStart_toStartOf="@+id/vertical_guideline9"
@@ -75,7 +76,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.925" />
+        app:layout_constraintGuide_percent="0.975" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_guideline11"
@@ -103,7 +104,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8" />
+        app:layout_constraintGuide_percent="0.75" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_guideline12"
