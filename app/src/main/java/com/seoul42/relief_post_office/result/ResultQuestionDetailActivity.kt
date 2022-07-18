@@ -1,5 +1,6 @@
 package com.seoul42.relief_post_office.result
 
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -40,8 +41,42 @@ class ResultQuestionDetailActivity : AppCompatActivity() {
 
     private fun setQuestionRecord(questionSrc: String) {
         if (questionSrc != "") {
-            binding.resultQuestionRecordBtn.setOnClickListener {
-                // 질문 녹음 재생 기능
+            val questionRecordBtn = binding.resultQuestionRecordBtn
+            questionRecordBtn.setOnClickListener {
+                // 재생 버튼 클릭 이벤트
+                var playing = false
+                var player: MediaPlayer? = null
+                questionRecordBtn.setOnClickListener{
+                    // 재생 중이면 재생 버튼으로 이미지 변경
+                    if (playing){
+                        player?.release()
+                        player = null
+                        questionRecordBtn.setImageResource(R.drawable.playbtn)
+                        playing = false
+                    }
+                    // 재생 중이 아니면 중지 버튼으로 이미지 변경
+                    else{
+                        // 녹음 소스 불러와서 미디어 플레이어 세팅
+                        player = MediaPlayer().apply {
+                            setDataSource(questionSrc)
+                            prepare()
+                        }
+
+                        player?.setOnCompletionListener {
+                            player?.release()
+                            player = null
+
+                            questionRecordBtn.setImageResource(R.drawable.playbtn)
+                            playing = false
+                        }
+
+                        // 재생
+                        player?.start()
+
+                        questionRecordBtn.setImageResource(R.drawable.stopbtn)
+                        playing = true
+                    }
+                }
             }
         }
     }
