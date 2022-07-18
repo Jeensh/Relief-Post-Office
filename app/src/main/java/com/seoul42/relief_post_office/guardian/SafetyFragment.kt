@@ -1,9 +1,13 @@
 package com.seoul42.relief_post_office.guardian
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.Window
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
@@ -15,24 +19,24 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.seoul42.relief_post_office.R
 import com.seoul42.relief_post_office.adapter.SafetyAdapter
-import com.seoul42.relief_post_office.model.ListenerDTO
+import com.seoul42.relief_post_office.model.QuestionDTO
 import com.seoul42.relief_post_office.model.SafetyDTO
-import com.seoul42.relief_post_office.model.UserDTO
 import com.seoul42.relief_post_office.safety.SafetyMake
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.*
 
-class SafetyFragment() : Fragment(R.layout.fragment_safety) {
+class SafetyFragment : Fragment(R.layout.fragment_safety) {
 
 	private val database = Firebase.database
 	private var safetyList = arrayListOf<Pair<String, SafetyDTO>>()
 	private lateinit var auth : FirebaseAuth
 	private lateinit var safetyAdapter : SafetyAdapter
 	private lateinit var owner : String
-	private lateinit var listenerDTO : ListenerDTO
 
 	// 프래그먼트 실행 시 동작
 	@RequiresApi(Build.VERSION_CODES.O)
@@ -62,7 +66,7 @@ class SafetyFragment() : Fragment(R.layout.fragment_safety) {
 		val userSafetyRef = database.getReference("guardian").child(owner).child("safetyList")
 
 		// safetyList에 로그인한 유저의 안부들 넣기
-		val safetyListener = userSafetyRef.addChildEventListener(object : ChildEventListener{
+		userSafetyRef.addChildEventListener(object : ChildEventListener{
 			override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
 				// 로그인한 유저의 안부 하나씩 참조
 				val safetyId = snapshot.key.toString()
@@ -120,16 +124,6 @@ class SafetyFragment() : Fragment(R.layout.fragment_safety) {
 			}
 
 		})
-		listenerDTO = ListenerDTO(userSafetyRef, safetyListener)
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-
-		val reference : DatabaseReference = listenerDTO.reference
-		val listener : ChildEventListener = listenerDTO.listener
-
-		reference.removeEventListener(listener)
 	}
 
 	// 리사이클러 뷰 세팅 함수
