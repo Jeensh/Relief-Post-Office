@@ -43,7 +43,6 @@ class EditWardSafetyActivity : AppCompatActivity() {
     private lateinit var safety : SafetyDTO
     private lateinit var editWardSafetyAdapter : AddWardSafetyAdapter
 
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,7 +126,6 @@ class EditWardSafetyActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.edit_ward_safety_question_setting).setOnClickListener{
             val tmpIntent = Intent(this, SafetyQuestionSettingActivity::class.java)
             tmpIntent.putExtra("questionList", questionList.toMap().keys.toCollection(ArrayList<String>()))
-            questionList.clear()
             startActivityForResult(tmpIntent, 1)
         }
 
@@ -254,9 +252,11 @@ class EditWardSafetyActivity : AppCompatActivity() {
                         .child(safetyId)
                     qRef.setValue(date)
 
-                    // 해당하는 질문들 보호자 질문 목록에서 최종 수정일 변경하기
-                    database.getReference("guardian").child(Firebase.auth.currentUser!!.uid)
-                        .child("questionList").child(q.first).setValue(date)
+                    if (q.second.owner == owner) {
+                        // 해당하는 질문들 보호자 질문 목록에서 최종 수정일 변경하기
+                        database.getReference("guardian").child(Firebase.auth.currentUser!!.uid)
+                            .child("questionList").child(q.first).setValue(date)
+                    }
                 }
                 // 기존에 설정되었다가 이번 수정에서 빠진 질문들 connectedSafetyList 동기화
                 for (q in deletedQuestionList){
@@ -313,6 +313,7 @@ class EditWardSafetyActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK){
             when (requestCode){
                 1 -> {
+                    questionList.clear()
                     editWardSafetyAdapter.notifyDataSetChanged()
                     val checkQuestions = data?.getStringArrayListExtra("returnQuestionList")
                     val QuestionRef = database.getReference("question")
@@ -326,6 +327,12 @@ class EditWardSafetyActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        database.getReference("safety").child(safetyId).child("Access")
+            .setValue(null)
     }
 
 }

@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
+import android.view.WindowManager
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -42,13 +43,13 @@ class AnswerActivity : AppCompatActivity() {
     }
 
     private var auth : FirebaseAuth = Firebase.auth
-
     private val database = Firebase.database
     private lateinit var questionList: ArrayList<Pair<String, QuestionDTO>>
     private lateinit var answerList: ArrayList<Pair<String, AnswerDTO>>
     private var listSize = 0
     private var currentIndex: Int = 0
     private lateinit var resultId : String
+    private lateinit var answerBell : MediaPlayer
     private lateinit var questionPlayer : MediaPlayer
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -62,6 +63,7 @@ class AnswerActivity : AppCompatActivity() {
     }
 
     private fun getId() {
+        answerBell = MediaPlayer.create(this, R.raw.bell)
         resultId = intent.getStringExtra("resultId").toString()
         questionList = intent.getSerializableExtra("questionList") as ArrayList<Pair<String, QuestionDTO>>
         answerList = intent.getSerializableExtra("answerList") as ArrayList<Pair<String, AnswerDTO>>
@@ -87,6 +89,7 @@ class AnswerActivity : AppCompatActivity() {
         binding.wardSafetyNo.buttonColor = resources.getColor(R.color.no)
         binding.wardSafetyRepeat.buttonColor = resources.getColor(R.color.gray)
         binding.wardSafetyNo.setOnClickListener {
+            answerBell.start()
             val reply: Boolean = false
             var recordSrc: String = ""
 
@@ -95,9 +98,19 @@ class AnswerActivity : AppCompatActivity() {
         }
 
         binding.wardSafetyYes.setOnClickListener {
+            answerBell.start()
             val reply: Boolean = true
             var recordSrc: String = ""
             if (questionList[currentIndex].second.record) {
+                // 화면 터치 방지
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+
+                // 녹음 안내 가이드 보이스
+                val recordGuide = MediaPlayer.create(this, R.raw.recordguide)
+                Handler().postDelayed({
+                    recordGuide.start()
+                }, 600)
+
                 val dialog = android.app.AlertDialog.Builder(binding.root.context).create()
                 val eDialog : LayoutInflater = LayoutInflater.from(binding.root.context)
                 val mView : View = eDialog.inflate(R.layout.answer_record_dialog, null)
@@ -107,40 +120,46 @@ class AnswerActivity : AppCompatActivity() {
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
                 dialog.create()
 
-                dialog.show()
+                Handler().postDelayed({
+                    // 녹음기능
+                    val answerRecordActivity = AnswerRecordActivity(mView)
+                    answerRecordActivity.startRecoding()
 
-                // 녹음기능
-                val answerRecordActivity = AnswerRecordActivity(mView)
+                    dialog.show()
 
-                answerRecordActivity.startRecoding()
+                    var answerRecordFile = Uri.fromFile(File(answerRecordActivity.returnRecordingFile()))
+                    val answerRecordRef =
+                        storage.reference.child("answerRecord/${auth.currentUser?.uid + LocalDateTime.now().format(
+                            DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}")
+                    var uploadAnswerRecord = answerRecordRef.putFile(answerRecordFile)
 
-                var answerRecordFile = Uri.fromFile(File(answerRecordActivity.returnRecordingFile()))
-                val answerRecordRef =
-                    storage.reference.child("answerRecord/${auth.currentUser?.uid + LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}")
-                var uploadAnswerRecord = answerRecordRef.putFile(answerRecordFile)
-
-                // 다이얼로그 종료 시 이벤트
-                dialog.setOnDismissListener {
-                    answerRecordActivity.stopRecording()
-                }
-
-                dialog.findViewById<Button>(R.id.record_stop_btn).setOnClickListener {
-                    // 녹음 중이라면 중단 후 저장
-                    answerRecordActivity.stopRecording()
-                    Log.d("record", answerRecordRef.toString())
-                    uploadAnswerRecord.addOnSuccessListener {
-                        answerRecordRef.downloadUrl.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                recordSrc = task.result.toString()
-                            }
-                            sendAnswer(reply, recordSrc)
-                        }
+                    // 다이얼로그 종료 시 이벤트
+                    dialog.setOnDismissListener {
+                        // 화면 터치 풀기
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                         nextQuestion()
-                        dialog.dismiss()
+                        recordGuide.release()
+                        answerRecordActivity.stopRecording()
                     }
-                }
+
+                    dialog.findViewById<Button>(R.id.record_stop_btn).setOnClickListener {
+                        // 녹음 중이라면 중단 후 저장
+                        answerRecordActivity.stopRecording()
+                        Log.d("record", answerRecordRef.toString())
+                        uploadAnswerRecord.addOnSuccessListener {
+                            answerRecordRef.downloadUrl.addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    recordSrc = task.result.toString()
+                                }
+                                sendAnswer(reply, recordSrc)
+                            }
+                            dialog.dismiss()
+                        }
+                    }
+                }, 13000)
             }
+            else
+                nextQuestion()
         }
     }
 
@@ -181,14 +200,17 @@ class AnswerActivity : AppCompatActivity() {
             setQuestion()
         }
         else {
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val date = sdf.format(System.currentTimeMillis())
-            database.getReference("result")
-                .child(resultId)
-                .child("responseTime")
-                .setValue(date)
-            startActivity(Intent(this, EndingActivity::class.java))
-            finish()
+            Handler().postDelayed({
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                val date = sdf.format(System.currentTimeMillis())
+                answerBell.release()
+                database.getReference("result")
+                    .child(resultId)
+                    .child("responseTime")
+                    .setValue(date)
+                startActivity(Intent(this, EndingActivity::class.java))
+                finish()
+            }, 800)
         }
     }
 }
