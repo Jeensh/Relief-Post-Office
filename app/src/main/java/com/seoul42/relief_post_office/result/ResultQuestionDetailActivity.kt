@@ -23,7 +23,7 @@ class ResultQuestionDetailActivity : AppCompatActivity() {
         setQuestionText(answer.second.questionText)
         setQuestionRecord(answer.second.questionSrc)
         setAnswerReply(answer.second.reply)
-        setAnswerRecord(answer.second.questionRecord, answer.second.answerSrc)
+        setAnswerRecord(onRecord(answer.second), answer.second.answerSrc)
         setQuestionOption(answer.second.questionRecord, answer.second.questionSecret)
     }
 
@@ -51,7 +51,7 @@ class ResultQuestionDetailActivity : AppCompatActivity() {
                     if (playing){
                         player?.release()
                         player = null
-                        questionRecordBtn.setImageResource(R.drawable.playbtn)
+                        questionRecordBtn.setImageResource(R.drawable.playbtn5)
                         playing = false
                     }
                     // 재생 중이 아니면 중지 버튼으로 이미지 변경
@@ -66,7 +66,7 @@ class ResultQuestionDetailActivity : AppCompatActivity() {
                             player?.release()
                             player = null
 
-                            questionRecordBtn.setImageResource(R.drawable.playbtn)
+                            questionRecordBtn.setImageResource(R.drawable.playbtn5)
                             playing = false
                         }
 
@@ -91,13 +91,50 @@ class ResultQuestionDetailActivity : AppCompatActivity() {
             binding.resultAnswerImg.visibility = View.GONE
     }
 
+    private fun onRecord(answer: AnswerDTO) : Boolean {
+        return ((answer.reply == true) && answer.questionRecord && (answer.answerSrc != ""))
+    }
+
     private fun setAnswerRecord(onRecord: Boolean, answerSrc: String) {
-        // 답변 녹음 재생 기능
         if (onRecord) {
             binding.resultAnswerRecordBtnTitle.visibility = View.VISIBLE
             binding.resultAnswerRecordLayout.visibility = View.VISIBLE
-            binding.resultAnswerRecordBtn.setOnClickListener {
-                // 질문 녹음 재생 기능
+            val answerRecordBtn = binding.resultAnswerRecordBtn
+            answerRecordBtn.setOnClickListener {
+                // 재생 버튼 클릭 이벤트
+                var playing = false
+                var player: MediaPlayer? = null
+                answerRecordBtn.setOnClickListener{
+                    // 재생 중이면 재생 버튼으로 이미지 변경
+                    if (playing){
+                        player?.release()
+                        player = null
+                        answerRecordBtn.setImageResource(R.drawable.playbtn5)
+                        playing = false
+                    }
+                    // 재생 중이 아니면 중지 버튼으로 이미지 변경
+                    else{
+                        // 녹음 소스 불러와서 미디어 플레이어 세팅
+                        player = MediaPlayer().apply {
+                            setDataSource(answerSrc)
+                            prepare()
+                        }
+
+                        player?.setOnCompletionListener {
+                            player?.release()
+                            player = null
+
+                            answerRecordBtn.setImageResource(R.drawable.playbtn5)
+                            playing = false
+                        }
+
+                        // 재생
+                        player?.start()
+
+                        answerRecordBtn.setImageResource(R.drawable.stopbtn)
+                        playing = true
+                    }
+                }
             }
         }
         else {

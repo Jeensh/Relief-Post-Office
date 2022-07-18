@@ -200,11 +200,11 @@
                 app:layout_constraintStart_toStartOf="@+id/vertical_guideline17"
                 app:layout_constraintTop_toBottomOf="@+id/result_answer_record_btn_title">
 
-                <Button
+                <ImageView
                     android:id="@+id/result_answer_record_btn"
                     android:layout_width="60dp"
                     android:layout_height="75dp"
-                    android:background="@drawable/playbtn5" />
+                    app:srcCompat="@drawable/playbtn5" />
 
             </LinearLayout>
 
